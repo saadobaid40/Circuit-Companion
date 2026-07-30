@@ -1,0 +1,63 @@
+IMPORTANT: Preserve all existing working backend calculations, circuit logic, saved presets, and working tools built so far. We are completing the "ElectroLab Suite" architecture with a Light/Dark theme switcher, an updated collapsible Sidebar layout, and 5 academic course suites.
+
+Please implement the following complete system upgrade:
+
+### 1. UI Architecture & Theme Switcher:
+- Global Theme Toggle (Dark / Light Mode): Add a theme toggle switch (Sun/Moon icon) at the top of the sidebar. Persist the theme preference in localStorage. Use Tailwind CSS dark: classes for seamless switching.
+- Collapsible Left Navigation Sidebar: Modern collapsible sidebar with Lucide React icons categorizing all tools:
+  - 🏠 Home Dashboard
+  - ⚡ Core Circuits & Resistors (Color Code, SMD, LED, Ohm's Law, Op-Amps, Filters, AC Power, PCB Trace, Transformers)
+  - 🧪 Electronics II Suite
+  - ⚙️ Electrical Machinery Suite
+  - 📶 Signals & Systems Suite
+  - 🧠 Microprocessors & Digital (Logic/K-Map, Registers, ADC/DAC, UART)
+  - 💻 MATLAB Studio & Matrix Hub
+  - 💾 Saved Presets
+
+---
+
+### 2. Electronics II Suite (New Tab):
+1. MOSFET & JFET Biasing Calculator:
+   - Compute $I_D, V_{GS}, V_{DS}$, and transconductance $g_m$ for Triode and Saturation regions.
+   - Dynamic status badge showing current operating state.
+2. Differential Amplifier & CMRR Calculator:
+   - Compute Differential Gain ($A_d$), Common-Mode Gain ($A_{cm}$), and Common-Mode Rejection Ratio ($\text{CMRR}$ in dB).
+3. Amplifier Frequency Response (Bode Plotter):
+   - Inputs: Low cutoff frequency ($f_L$), High cutoff frequency ($f_H$), Midband Gain ($A_{mid}$).
+   - Dynamic plot showing Bandwidth ($\text{BW}$) and gain roll-off curves.
+
+---
+
+### 3. Electrical Machinery Suite (New Tab):
+1. DC Motor / Generator Analyzer:
+   - Inputs: Terminal Voltage ($V_t$), Armature Resistance ($R_a$), Field Current, and Load.
+   - Outputs: Back EMF ($E_a$), Speed (RPM), Developed Torque ($\tau$), and interactive Speed vs. Torque characteristic curve.
+2. Induction Motor & Slip Calculator:
+   - Inputs: Stator frequency ($f$), Poles ($P$), Actual Rotor Speed ($N$).
+   - Outputs: Synchronous Speed ($N_s$), Slip ($s$), Rotor frequency ($f_r$), and a visual Power Flow Diagram.
+3. Synchronous Machine Phasor Diagram Generator:
+   - Compute Voltage Regulation ($\% \text{VR}$) and Torque Angle ($\delta$) with a vector phasor visualizer.
+
+---
+
+### 4. Signals & Systems Suite (New Tab):
+1. Interactive Convolution Visualizer:
+   - Step-by-step visualizer illustrating continuous/discrete signal convolution $(f * g)(t)$ as one signal slides over another.
+2. Laplace & Z-Transform Pole-Zero Plotter:
+   - Input transfer function coefficients (Numerator & Denominator).
+   - Interactive plot rendering Poles (X) and Zeros (O) on the $s$-plane / $z$-plane, indicating Region of Convergence (ROC) and System Stability.
+3. Fourier Series Waveform Synthesizer:
+   - Combine harmonic frequencies ($N = 1, 3, 5, \dots$) to visually synthesize Square, Sawtooth, and Triangle wave approximations in real time.
+
+---
+
+### 5. Microprocessors & Digital Suite (New Tab):
+1. ADC / DAC Resolution Calculator:
+   - Inputs: Resolution (bits, e.g., 8, 10, 12, 16-bit), Reference Voltage ($V_{ref}$).
+   - Outputs: Step size (LSB voltage), quantization error, and digital output code for any analog input voltage.
+2. UART Baud Rate & Microcontroller Timer Reload Tool:
+   - Inputs: Oscillator Frequency ($f_{osc}$), Target Baud Rate (e.g., 9600, 115200).
+   - Outputs: Timer reload/prescaler values and actual baud rate error percentage (%).
+3. Bitwise Register Mask Visualizer:
+   - Interactive 8-bit, 16-bit, or 32-bit register grid.
+   - Perform Bitwise operations (SET, CLEAR, TOGGLE, MASK) and view resulting Hex, Binary, and Decimal values live.

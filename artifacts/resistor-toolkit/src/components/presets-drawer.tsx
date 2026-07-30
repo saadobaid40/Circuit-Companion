@@ -7,10 +7,14 @@ import { usePresets } from '@/hooks/use-presets';
 
 interface PresetsDrawerProps {
   onLoadPreset: (preset: Preset) => void;
+  /** Controlled open state — when provided the built-in trigger button is hidden */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function PresetsDrawer({ onLoadPreset }: PresetsDrawerProps) {
+export function PresetsDrawer({ onLoadPreset, open, onOpenChange }: PresetsDrawerProps) {
   const { presets, deletePreset } = usePresets();
+  const isControlled = open !== undefined;
 
   const getTypeBadgeColor = (type: Preset['type']) => {
     switch (type) {
@@ -47,18 +51,20 @@ export function PresetsDrawer({ onLoadPreset }: PresetsDrawerProps) {
   };
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          data-testid="button-open-presets"
-        >
-          <Bookmark className="w-4 h-4" />
-          Saved Presets
-        </Button>
-      </SheetTrigger>
+    <Sheet open={isControlled ? open : undefined} onOpenChange={isControlled ? onOpenChange : undefined}>
+      {!isControlled && (
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            data-testid="button-open-presets"
+          >
+            <Bookmark className="w-4 h-4" />
+            Saved Presets
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="font-bold">Saved Presets</SheetTitle>
