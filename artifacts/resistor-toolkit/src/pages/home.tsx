@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { ColorCodeCalculator } from '@/components/color-code-calculator';
 import { SeriesParallelCalculator } from '@/components/series-parallel-calculator';
@@ -15,6 +15,8 @@ import { ConvolutionVisualizer, PoleZeroPlotter, FourierSynthesizer } from '@/co
 import { ADCDACCalculator, UARTCalculator, RegisterVisualizer } from '@/components/micro-tools';
 import { MATLABScriptGenerator, MatrixCalculator } from '@/components/matlab-suite';
 import { PresetsDrawer } from '@/components/presets-drawer';
+import { CommandPalette } from '@/components/command-palette';
+import { QuickRefModal } from '@/components/quick-ref-modal';
 import { useTheme } from '@/hooks/use-theme';
 import { usePresets } from '@/hooks/use-presets';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +24,7 @@ import { Preset } from '@/lib/presets';
 import {
   Zap, FlaskConical, Settings2, Waves, Brain, Terminal,
   ChevronRight, Construction, Clock,
+  Menu, Search, BookOpen,
 } from 'lucide-react';
 
 // ── Breadcrumb map ────────────────────────────────────────────────────────────
@@ -243,6 +246,21 @@ export default function Home() {
   const { savePreset: savePresetToStorage } = usePresets();
   const [activeView, setActiveView] = useState('home');
   const [presetsOpen, setPresetsOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [quickRefOpen, setQuickRefOpen] = useState(false);
+
+  // Cmd / Ctrl + K — toggle command palette
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', down);
+    return () => window.removeEventListener('keydown', down);
+  }, []);
 
   const handleLoadPreset = (preset: Preset) => {
     const tabMap: Record<Preset['type'], string> = {
@@ -328,19 +346,60 @@ export default function Home() {
         onThemeToggle={toggleTheme}
         onPresetsOpen={() => setPresetsOpen(true)}
         onPrint={() => window.print()}
+        onQuickRef={() => setQuickRefOpen(true)}
+        mobileOpen={mobileSidebarOpen}
+        onMobileClose={() => setMobileSidebarOpen(false)}
       />
 
       {/* Main area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex-shrink-0 h-12 border-b border-border bg-card/50 backdrop-blur-sm flex items-center px-5 gap-2 no-print">
-          <span className="text-xs text-muted-foreground font-mono">{bc.section}</span>
+        <header className="flex-shrink-0 h-12 border-b border-border bg-card/50 backdrop-blur-sm flex items-center px-3 gap-2 no-print">
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            title="Open navigation"
+            className="md:hidden p-1.5 rounded border border-border bg-muted/20 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+
+          {/* Mini brand — mobile only */}
+          <div className="md:hidden flex items-center gap-1.5 flex-shrink-0">
+            <Zap className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-bold text-foreground tracking-tight">ElectroLab</span>
+          </div>
+
+          {/* Breadcrumb — desktop */}
+          <span className="hidden md:block text-xs text-muted-foreground font-mono truncate">{bc.section}</span>
           {bc.tool && (
-            <>
+            <div className="hidden md:flex items-center gap-2 min-w-0">
               <ChevronRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0" />
-              <span className="text-xs font-semibold text-foreground font-mono">{bc.tool}</span>
-            </>
+              <span className="text-xs font-semibold text-foreground font-mono truncate">{bc.tool}</span>
+            </div>
           )}
+
+          <div className="flex-1" />
+
+          {/* Quick Ref button */}
+          <button
+            onClick={() => setQuickRefOpen(true)}
+            title="EE Quick Reference formulas"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-border bg-muted/20 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors text-xs font-mono flex-shrink-0"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span className="hidden sm:block">Quick Ref</span>
+          </button>
+
+          {/* Command palette trigger */}
+          <button
+            onClick={() => setCommandOpen(true)}
+            title="Search tools (Cmd+K / Ctrl+K)"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-border bg-muted/20 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors text-xs font-mono flex-shrink-0"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <kbd className="hidden sm:block text-[10px]">⌘K</kbd>
+          </button>
         </header>
 
         {/* Print-only header */}
@@ -363,6 +422,19 @@ export default function Home() {
         open={presetsOpen}
         onOpenChange={setPresetsOpen}
         onLoadPreset={handleLoadPreset}
+      />
+
+      {/* Global command palette (Cmd+K) */}
+      <CommandPalette
+        open={commandOpen}
+        onClose={() => setCommandOpen(false)}
+        onNavigate={view => { setActiveView(view); setCommandOpen(false); }}
+      />
+
+      {/* EE Quick Reference cheatsheet */}
+      <QuickRefModal
+        open={quickRefOpen}
+        onClose={() => setQuickRefOpen(false)}
       />
     </div>
   );

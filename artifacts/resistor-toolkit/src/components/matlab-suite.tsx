@@ -4,19 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Copy, Check } from 'lucide-react';
 import { matInverse, matDet, matEigenvalues, gaussSolve, fmt, type Matrix, type Vector } from '@/lib/matrix-math';
-
-// ── Shared helpers ────────────────────────────────────────────────────────────
-
-function useClipboard(text: string) {
-  const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-  return { copied, copy };
-}
+import { useToast } from '@/hooks/use-toast';
 
 // ── MATLAB Script Generator ───────────────────────────────────────────────────
 
@@ -182,7 +170,15 @@ export function MATLABScriptGenerator() {
   const setParam = (key: string, v: string) => setParams(p => ({ ...p, [key]: v }));
 
   const script = useMemo(() => generateScript(scriptType, params), [scriptType, params]);
-  const { copied, copy } = useClipboard(script);
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(script).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ title: '✓ Copied to clipboard!', description: 'MATLAB script ready to paste', duration: 2500 });
+    });
+  };
 
   return (
     <div className="space-y-6">
