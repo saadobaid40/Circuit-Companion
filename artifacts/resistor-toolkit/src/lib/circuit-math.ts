@@ -447,3 +447,187 @@ export function calculateLEDResistor(
     current: ifAmps,
   };
 }
+
+// Extended filter calculations with RLC support
+export interface ExtendedFilterResult {
+  // Core
+  topology: 'rc' | 'rl' | 'rlc-series' | 'rlc-parallel';
+  responseType: 'low-pass' | 'high-pass' | 'band-pass' | 'band-stop';
+  
+  // Frequency params
+  fc: number | null;      // cutoff for LPF/HPF (Hz)
+  f0: number | null;      // resonant/center for BPF/BSF (Hz)
+  f1: number | null;      // lower -3dB cutoff (Hz)
+  f2: number | null;      // upper -3dB cutoff (Hz)
+  bw: number | null;      // bandwidth = f2 - f1 (Hz)
+  
+  // Quality
+  q: number | null;       // quality factor (RLC only)
+  
+  // At test frequency f
+  gainRatio: number;      // |H(f)| linear
+  gainDb: number;         // 20·log10(|H(f)|)
+  phaseShift: number;     // degrees
+  ratio: number;          // f/fc or f/f0
+}
+
+export function calculateExtendedFilter(params: {
+  topology: 'rc' | 'rl' | 'rlc-series' | 'rlc-parallel';
+  responseType: 'low-pass' | 'high-pass' | 'band-pass' | 'band-stop';
+  r: number;        // Ohms
+  c: number | null; // Farads (null for RL)
+  l: number | null; // Henries (null for RC)
+  f: number;        // test frequency Hz
+}): ExtendedFilterResult {
+  const { topology, responseType, r, c, l, f } = params;
+  
+  if (topology === 'rc' && c !== null) {
+    // RC filters: fc = 1/(2π·R·C)
+    const fc = 1 / (2 * Math.PI * r * c);
+    const ratio = f / fc;
+    let gainRatio: number;
+    let phaseShift: number;
+    
+    if (responseType === 'low-pass') {
+      gainRatio = 1 / Math.sqrt(1 + ratio * ratio);
+      phaseShift = -(Math.atan(ratio) * 180) / Math.PI;
+    } else {
+      // high-pass
+      gainRatio = ratio / Math.sqrt(1 + ratio * ratio);
+      phaseShift = (Math.atan(1 / ratio) * 180) / Math.PI;
+    }
+    
+    const gainDb = 20 * Math.log10(gainRatio);
+    
+    return {
+      topology: 'rc',
+      responseType,
+      fc,
+      f0: null,
+      f1: null,
+      f2: null,
+      bw: null,
+      q: null,
+      gainRatio,
+      gainDb,
+      phaseShift,
+      ratio,
+    };
+  }
+  
+  if (topology === 'rl' && l !== null) {
+    // RL filters: fc = R/(2π·L)
+    const fc = r / (2 * Math.PI * l);
+    const ratio = f / fc;
+    let gainRatio: number;
+    let phaseShift: number;
+    
+    if (responseType === 'low-pass') {
+      gainRatio = 1 / Math.sqrt(1 + ratio * ratio);
+      phaseShift = -(Math.atan(ratio) * 180) / Math.PI;
+    } else {
+      // high-pass
+      gainRatio = ratio / Math.sqrt(1 + ratio * ratio);
+      phaseShift = (Math.atan(1 / ratio) * 180) / Math.PI;
+    }
+    
+    const gainDb = 20 * Math.log10(gainRatio);
+    
+    return {
+      topology: 'rl',
+      responseType,
+      fc,
+      f0: null,
+      f1: null,
+      f2: null,
+      bw: null,
+      q: null,
+      gainRatio,
+      gainDb,
+      phaseShift,
+      ratio,
+    };
+  }
+  
+  if ((topology === 'rlc-series' || topology === 'rlc-parallel') && l !== null && c !== null) {
+    // RLC filters
+    const f0 = 1 / (2 * Math.PI * Math.sqrt(l * c));
+    const q = topology === 'rlc-series' 
+      ? Math.sqrt(l / c) / r 
+      : r * Math.sqrt(c / l);
+    const bw = f0 / q;
+    
+    // Calculate f1 and f2 (bandwidth cutoffs)
+    const sqrtTerm = Math.sqrt(1 + 1 / (4 * q * q));
+    const f1 = f0 * (sqrtTerm - 1 / (2 * q));
+    const f2 = f0 * (sqrtTerm + 1 / (2 * q));
+    
+    const ratio = f / f0;
+    const omega0 = 2 * Math.PI * f0;
+    const omega = 2 * Math.PI * f;
+    
+    let gainRatio: number;
+    let phaseShift: number;
+    
+    if (responseType === 'low-pass') {
+      // RLC LPF: |H| = 1/√(1 + Q²·(f/f0 - f0/f)²)
+      const term = ratio - 1 / ratio;
+      gainRatio = 1 / Math.sqrt(1 + q * q * term * term);
+      phaseShift = -(Math.atan(q * term) * 180) / Math.PI;
+    } else if (responseType === 'high-pass') {
+      // RLC HPF: |H| = (f/f0)²/√((1-(f/f0)²)²+(f/(Q·f0))²)
+      const r2 = ratio * ratio;
+      const denom = Math.sqrt(Math.pow(1 - r2, 2) + Math.pow(ratio / q, 2));
+      gainRatio = r2 / denom;
+      const numerAngle = Math.atan2(0, r2); // 0 degrees for positive real
+      const denomAngle = Math.atan2(ratio / q, 1 - r2);
+      phaseShift = ((numerAngle - denomAngle) * 180) / Math.PI;
+    } else if (responseType === 'band-pass') {
+      // RLC BPF (voltage across R in series): |H| = (f/f0) / (Q·√((1-(f/f0)²)²+(f/f0-f0/f)²))
+      const term = ratio - 1 / ratio;
+      gainRatio = ratio / (q * Math.sqrt(Math.pow(1 - ratio * ratio, 2) + term * term));
+      // Simplified: at f0, phase = 0; below f0, phase > 0; above f0, phase < 0
+      phaseShift = 90 - (Math.atan((omega * omega0 / q) / (omega0 * omega0 - omega * omega)) * 180) / Math.PI;
+    } else {
+      // band-stop (notch)
+      // RLC BSF: |H| = |ω0²-ω²| / √((ω0²-ω²)²+(ω·ω0/Q)²)
+      const omegaDiff = omega0 * omega0 - omega * omega;
+      const denomTerm = omega * omega0 / q;
+      gainRatio = Math.abs(omegaDiff) / Math.sqrt(omegaDiff * omegaDiff + denomTerm * denomTerm);
+      phaseShift = (Math.atan2(denomTerm, omegaDiff) * 180) / Math.PI;
+    }
+    
+    const gainDb = 20 * Math.log10(gainRatio);
+    
+    return {
+      topology,
+      responseType,
+      fc: null,
+      f0,
+      f1,
+      f2,
+      bw,
+      q,
+      gainRatio,
+      gainDb,
+      phaseShift,
+      ratio,
+    };
+  }
+  
+  // Fallback (should not reach here with valid inputs)
+  return {
+    topology,
+    responseType,
+    fc: null,
+    f0: null,
+    f1: null,
+    f2: null,
+    bw: null,
+    q: null,
+    gainRatio: 0,
+    gainDb: -Infinity,
+    phaseShift: 0,
+    ratio: 0,
+  };
+}

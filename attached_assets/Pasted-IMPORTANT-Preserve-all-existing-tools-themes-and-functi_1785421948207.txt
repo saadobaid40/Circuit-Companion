@@ -1,0 +1,30 @@
+IMPORTANT: Preserve all existing tools, themes, and functionalities currently working in the app. We are heavily upgrading and expanding the "Filters Calculator" tab into a comprehensive passive filter suite.
+
+Please update the Filter Calculator tab with the following features:
+
+1. **Complete Passive Filter Matrix (RC, RL, and RLC):**
+   - **Filter Topologies:** RC, RL, and RLC.
+   - **Response Types:** Low-Pass (LPF), High-Pass (HPF), Band-Pass (BPF), and Band-Stop / Notch (BSF).
+   - Support all valid combinations:
+     - RC LPF & HPF
+     - RL LPF & HPF
+     - RLC LPF, HPF, BPF, and BSF (Series and Parallel topologies where applicable).
+
+2. **Visual Circuit Schematic Diagrams:**
+   - Below/alongside the controls, render a clean, dynamic vector/SVG circuit diagram showing the exact component placement (Resistor, Inductor, Capacitor, V_in, V_out, and Ground).
+   - The schematic must clearly visually highlight how $V_{out}$ is taken across components to differentiate between LPF, HPF, BPF, and BSF configurations.
+
+3. **Frequency Response & Cutoff Spectrum Diagram:**
+   - Include a visual frequency response plot (Gain |H(f)| in dB vs Frequency f).
+   - Clearly depict the cutoff frequency point $f_c$ (at the -3dB / $0.707$ level) for LPF/HPF.
+   - For BPF and BSF, clearly display the Center/Resonant Frequency ($f_0$), lower cutoff ($f_1$), upper cutoff ($f_2$), and Bandwidth ($BW$).
+
+4. **Dedicated Formulas & Math Reference Card:**
+   - Display a clean formula panel directly next to or below the inputs showing the exact mathematical equations used for calculation:
+     - Cutoff Frequency formulas ($f_c = \frac{1}{2\pi RC}$, $f_c = \frac{R}{2\pi L}$)
+     - Resonant Frequency formula for RLC ($f_0 = \frac{1}{2\pi\sqrt{LC}}$)
+     - Quality Factor ($Q$), Bandwidth ($BW = f_2 - f_1$), and Phase Shift ($\theta$).
+
+5. **Enhanced Calculated Outputs:**
+   - Inputs: $R$, $L$, $C$, and Test Frequency ($f$).
+   - Real-time calculated outputs: $f_c$ / $f_0$, Bandwidth ($BW$), Quality Factor ($Q$ for RLC), Gain at test frequency (in ratio & dB), and Phase Shift (degrees)
