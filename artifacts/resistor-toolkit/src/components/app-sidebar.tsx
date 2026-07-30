@@ -8,6 +8,7 @@ import {
   CircuitBoard, Layers, TrendingDown,
   Gauge, RefreshCw, Compass,
   Shuffle, Target, BarChart2,
+  Sliders, Radio, ToggleLeft, FileCode, Sigma,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -90,8 +91,11 @@ const SECTIONS: NavSection[] = [
     icon: Brain,
     color: 'text-accent',
     tools: [
-      { id: 'digital-logic', label: 'Digital Logic & K-Map', icon: Grid3x3 },
-      { id: 'bjt',           label: 'BJT Transistor Bias',   icon: Cpu },
+      { id: 'digital-logic', label: 'Digital Logic & K-Map',  icon: Grid3x3 },
+      { id: 'bjt',           label: 'BJT Transistor Bias',    icon: Cpu },
+      { id: 'adc-dac',       label: 'ADC / DAC Calculator',   icon: Sliders },
+      { id: 'uart',          label: 'UART Baud Rate & Timer', icon: Radio },
+      { id: 'register',      label: 'Register Visualizer',    icon: ToggleLeft },
     ],
   },
   {
@@ -99,7 +103,10 @@ const SECTIONS: NavSection[] = [
     label: 'MATLAB Studio',
     icon: Terminal,
     color: 'text-rose-400',
-    comingSoon: true,
+    tools: [
+      { id: 'script-gen',  label: 'Script Generator',  icon: FileCode },
+      { id: 'matrix-calc', label: 'Matrix Calculator', icon: Sigma },
+    ],
   },
 ];
 

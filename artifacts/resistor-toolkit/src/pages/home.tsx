@@ -12,6 +12,8 @@ import { BjtCalculator } from '@/components/bjt-calculator';
 import { MOSFETCalculator, DiffAmpCMRRCalculator, BodePlotter } from '@/components/electronics2-suite';
 import { DCMotorAnalyzer, InductionMotorCalc, SynchronousMachineCalc } from '@/components/machinery-suite';
 import { ConvolutionVisualizer, PoleZeroPlotter, FourierSynthesizer } from '@/components/signals-suite';
+import { ADCDACCalculator, UARTCalculator, RegisterVisualizer } from '@/components/micro-tools';
+import { MATLABScriptGenerator, MatrixCalculator } from '@/components/matlab-suite';
 import { PresetsDrawer } from '@/components/presets-drawer';
 import { useTheme } from '@/hooks/use-theme';
 import { usePresets } from '@/hooks/use-presets';
@@ -35,6 +37,11 @@ const BREADCRUMBS: Record<string, { section: string; tool?: string }> = {
   'core.ac-power':        { section: 'Core Circuits & Resistors', tool: 'AC Power' },
   'micro.digital-logic':          { section: 'Microprocessors & Digital', tool: 'Digital Logic & K-Map' },
   'micro.bjt':                    { section: 'Microprocessors & Digital', tool: 'BJT Transistor Bias' },
+  'micro.adc-dac':               { section: 'Microprocessors & Digital', tool: 'ADC / DAC Calculator' },
+  'micro.uart':                  { section: 'Microprocessors & Digital', tool: 'UART Baud Rate & Timer' },
+  'micro.register':              { section: 'Microprocessors & Digital', tool: 'Register Visualizer' },
+  'matlab.script-gen':           { section: 'MATLAB Studio & Matrix Hub', tool: 'Script Generator' },
+  'matlab.matrix-calc':          { section: 'MATLAB Studio & Matrix Hub', tool: 'Matrix Calculator' },
   'electronics-ii.mosfet':        { section: 'Electronics II Suite', tool: 'MOSFET & JFET Biasing' },
   'electronics-ii.diff-amp':      { section: 'Electronics II Suite', tool: 'Diff Amp & CMRR' },
   'electronics-ii.bode':          { section: 'Electronics II Suite', tool: 'Amplifier Bode Plotter' },
@@ -68,7 +75,7 @@ const SUITE_CARDS = [
     color: 'text-accent',
     border: 'border-accent/20 hover:border-accent/50',
     bg: 'bg-accent/5',
-    tools: ['Digital Logic & K-Map', 'BJT Transistor Bias'],
+    tools: ['Digital Logic & K-Map', 'BJT Transistor Bias', 'ADC / DAC', 'UART Baud Rate', 'Register Visualizer'],
     firstView: 'micro.digital-logic',
     available: true,
   },
@@ -113,8 +120,8 @@ const SUITE_CARDS = [
     border: 'border-rose-500/20 hover:border-rose-500/40',
     bg: 'bg-rose-500/5',
     tools: ['MATLAB Script Generator', 'EE Matrix Calculator'],
-    firstView: 'matlab',
-    available: false,
+    firstView: 'matlab.script-gen',
+    available: true,
   },
 ];
 
@@ -133,10 +140,10 @@ function HomeDashboard({ onNavigate }: { onNavigate: (v: string) => void }) {
           </p>
           <div className="flex items-center gap-3 mt-3">
             <span className="text-xs font-mono px-2 py-1 rounded border border-primary/30 bg-primary/5 text-primary">
-              18 tools active
+              23 tools active
             </span>
             <span className="text-xs font-mono px-2 py-1 rounded border border-border bg-muted/20 text-muted-foreground">
-              5 suites live
+              6 suites live
             </span>
             <span className="text-xs font-mono px-2 py-1 rounded border border-border bg-muted/20 text-muted-foreground">
               100% client-side
@@ -191,13 +198,7 @@ function HomeDashboard({ onNavigate }: { onNavigate: (v: string) => void }) {
 // ── Coming Soon placeholder ───────────────────────────────────────────────────
 
 const COMING_SOON_DETAILS: Record<string, { label: string; icon: React.ElementType; color: string; tools: { name: string; desc: string }[] }> = {
-  'matlab': {
-    label: 'MATLAB Studio & Matrix Hub', icon: Terminal, color: 'text-rose-400',
-    tools: [
-      { name: 'MATLAB / Octave Script Generator', desc: 'Bode, FFT, Nodal Analysis, Convolution scripts' },
-      { name: 'EE Matrix Calculator', desc: 'Inverse, Determinant, Eigenvalues, A·x = b solver' },
-    ],
-  },
+  // All suites are now live — reserved for future additions
 };
 
 function ComingSoon({ view }: { view: string }) {
@@ -302,8 +303,12 @@ export default function Home() {
       case 'signals.convolution':        return <ConvolutionVisualizer />;
       case 'signals.pole-zero':          return <PoleZeroPlotter />;
       case 'signals.fourier':            return <FourierSynthesizer />;
+      case 'micro.adc-dac':             return <ADCDACCalculator />;
+      case 'micro.uart':                return <UARTCalculator />;
+      case 'micro.register':            return <RegisterVisualizer />;
       case 'matlab':
-        return <ComingSoon view={activeView} />;
+      case 'matlab.script-gen':         return <MATLABScriptGenerator />;
+      case 'matlab.matrix-calc':        return <MatrixCalculator />;
       default:
         return <HomeDashboard onNavigate={setActiveView} />;
     }
