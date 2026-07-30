@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { SeriesCircuit, ParallelCircuit } from '@/components/circuit-diagram';
+import { SavePresetDialog } from '@/components/save-preset-dialog';
 import { Plus, Trash2, Copy, Download, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -19,7 +20,11 @@ interface Resistor {
   value: string;
 }
 
-export function SeriesParallelCalculator() {
+interface SeriesParallelCalculatorProps {
+  onSave?: (data: Record<string, unknown>, name: string) => void;
+}
+
+export function SeriesParallelCalculator({ onSave }: SeriesParallelCalculatorProps = {}) {
   const { toast } = useToast();
   const [mode, setMode] = useState<'series' | 'parallel'>('series');
   const [resistors, setResistors] = useState<Resistor[]>([
@@ -190,6 +195,12 @@ export function SeriesParallelCalculator() {
                 );
               })}
             </div>
+
+            {onSave && (
+              <SavePresetDialog
+                onSave={(name) => onSave({ mode, resistors }, name)}
+              />
+            )}
           </CardContent>
         </Card>
 

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ResistorSVG } from '@/components/resistor-svg';
+import { SavePresetDialog } from '@/components/save-preset-dialog';
 import { Copy, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -22,7 +23,11 @@ import {
   colorDatabase,
 } from '@/lib/resistor-color-code';
 
-export function ColorCodeCalculator() {
+interface ColorCodeCalculatorProps {
+  onSave?: (data: Record<string, unknown>, name: string) => void;
+}
+
+export function ColorCodeCalculator({ onSave }: ColorCodeCalculatorProps = {}) {
   const { toast } = useToast();
   const [mode, setMode] = useState<'encode' | 'decode'>('encode');
   const [bandCount, setBandCount] = useState<4 | 5 | 6>(4);
@@ -216,6 +221,12 @@ export function ColorCodeCalculator() {
                     />
                   )}
                 </div>
+
+                {onSave && (
+                  <SavePresetDialog
+                    onSave={(name) => onSave({ mode, bandCount, band1, band2, band3, multiplier, tolerance, tempCo }, name)}
+                  />
+                )}
               </CardContent>
             </Card>
 
