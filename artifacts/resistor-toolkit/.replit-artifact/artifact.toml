@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Resistor Toolkit"
+version = "1.0.0"
+id = "artifacts/resistor-toolkit"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22478
+
+[services.development]
+run = "pnpm --filter @workspace/resistor-toolkit run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/resistor-toolkit", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/resistor-toolkit/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22478"
+BASE_PATH = "/"
