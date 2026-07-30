@@ -5,6 +5,9 @@ import {
   ChevronDown, ChevronRight,
   Palette, Share2, Calculator, Triangle, Activity,
   Lightbulb, Grid3x3, Cpu, Printer,
+  CircuitBoard, Layers, TrendingDown,
+  Gauge, RefreshCw, Compass,
+  Shuffle, Target, BarChart2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -53,21 +56,33 @@ const SECTIONS: NavSection[] = [
     label: 'Electronics II Suite',
     icon: FlaskConical,
     color: 'text-emerald-400',
-    comingSoon: true,
+    tools: [
+      { id: 'mosfet',   label: 'MOSFET & JFET Biasing', icon: CircuitBoard },
+      { id: 'diff-amp', label: 'Diff Amp & CMRR',        icon: Layers },
+      { id: 'bode',     label: 'Amplifier Bode Plotter', icon: TrendingDown },
+    ],
   },
   {
     id: 'machinery',
     label: 'Electrical Machinery',
     icon: Settings2,
     color: 'text-orange-400',
-    comingSoon: true,
+    tools: [
+      { id: 'dc-motor',    label: 'DC Motor / Generator',   icon: Gauge },
+      { id: 'induction',   label: 'Induction Motor & Slip', icon: RefreshCw },
+      { id: 'synchronous', label: 'Synchronous Machine',    icon: Compass },
+    ],
   },
   {
     id: 'signals',
     label: 'Signals & Systems',
     icon: Waves,
     color: 'text-violet-400',
-    comingSoon: true,
+    tools: [
+      { id: 'convolution', label: 'Convolution Visualizer', icon: Shuffle },
+      { id: 'pole-zero',   label: 'Pole-Zero Plotter',      icon: Target },
+      { id: 'fourier',     label: 'Fourier Synthesizer',    icon: BarChart2 },
+    ],
   },
   {
     id: 'micro',

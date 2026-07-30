@@ -9,6 +9,9 @@ import { SmdLedCalculator } from '@/components/smd-led-calculator';
 import { AcPowerCalculator } from '@/components/ac-power-calculator';
 import { DigitalLogicCalculator } from '@/components/digital-logic-calculator';
 import { BjtCalculator } from '@/components/bjt-calculator';
+import { MOSFETCalculator, DiffAmpCMRRCalculator, BodePlotter } from '@/components/electronics2-suite';
+import { DCMotorAnalyzer, InductionMotorCalc, SynchronousMachineCalc } from '@/components/machinery-suite';
+import { ConvolutionVisualizer, PoleZeroPlotter, FourierSynthesizer } from '@/components/signals-suite';
 import { PresetsDrawer } from '@/components/presets-drawer';
 import { useTheme } from '@/hooks/use-theme';
 import { usePresets } from '@/hooks/use-presets';
@@ -30,12 +33,18 @@ const BREADCRUMBS: Record<string, { section: string; tool?: string }> = {
   'core.filters':         { section: 'Core Circuits & Resistors', tool: 'Filters' },
   'core.smd-led':         { section: 'Core Circuits & Resistors', tool: 'SMD & LED' },
   'core.ac-power':        { section: 'Core Circuits & Resistors', tool: 'AC Power' },
-  'micro.digital-logic':  { section: 'Microprocessors & Digital', tool: 'Digital Logic & K-Map' },
-  'micro.bjt':            { section: 'Microprocessors & Digital', tool: 'BJT Transistor Bias' },
-  'electronics-ii':       { section: 'Electronics II Suite' },
-  'machinery':            { section: 'Electrical Machinery Suite' },
-  'signals':              { section: 'Signals & Systems Suite' },
-  'matlab':               { section: 'MATLAB Studio & Matrix Hub' },
+  'micro.digital-logic':          { section: 'Microprocessors & Digital', tool: 'Digital Logic & K-Map' },
+  'micro.bjt':                    { section: 'Microprocessors & Digital', tool: 'BJT Transistor Bias' },
+  'electronics-ii.mosfet':        { section: 'Electronics II Suite', tool: 'MOSFET & JFET Biasing' },
+  'electronics-ii.diff-amp':      { section: 'Electronics II Suite', tool: 'Diff Amp & CMRR' },
+  'electronics-ii.bode':          { section: 'Electronics II Suite', tool: 'Amplifier Bode Plotter' },
+  'machinery.dc-motor':           { section: 'Electrical Machinery', tool: 'DC Motor / Generator' },
+  'machinery.induction':          { section: 'Electrical Machinery', tool: 'Induction Motor & Slip' },
+  'machinery.synchronous':        { section: 'Electrical Machinery', tool: 'Synchronous Machine Phasor' },
+  'signals.convolution':          { section: 'Signals & Systems', tool: 'Convolution Visualizer' },
+  'signals.pole-zero':            { section: 'Signals & Systems', tool: 'Pole-Zero Plotter' },
+  'signals.fourier':              { section: 'Signals & Systems', tool: 'Fourier Synthesizer' },
+  'matlab':                       { section: 'MATLAB Studio & Matrix Hub' },
 };
 
 // ── Home Dashboard ────────────────────────────────────────────────────────────
@@ -71,8 +80,8 @@ const SUITE_CARDS = [
     border: 'border-emerald-500/20 hover:border-emerald-500/40',
     bg: 'bg-emerald-500/5',
     tools: ['MOSFET & JFET Biasing', 'Diff Amplifier & CMRR', 'Bode Plotter'],
-    firstView: 'electronics-ii',
-    available: false,
+    firstView: 'electronics-ii.mosfet',
+    available: true,
   },
   {
     id: 'machinery',
@@ -82,8 +91,8 @@ const SUITE_CARDS = [
     border: 'border-orange-500/20 hover:border-orange-500/40',
     bg: 'bg-orange-500/5',
     tools: ['DC Motor / Generator', 'Induction Motor & Slip', 'Synchronous Machine Phasor'],
-    firstView: 'machinery',
-    available: false,
+    firstView: 'machinery.dc-motor',
+    available: true,
   },
   {
     id: 'signals',
@@ -93,8 +102,8 @@ const SUITE_CARDS = [
     border: 'border-violet-500/20 hover:border-violet-500/40',
     bg: 'bg-violet-500/5',
     tools: ['Convolution Visualizer', 'Pole-Zero Plotter', 'Fourier Synthesizer'],
-    firstView: 'signals',
-    available: false,
+    firstView: 'signals.convolution',
+    available: true,
   },
   {
     id: 'matlab',
@@ -124,10 +133,10 @@ function HomeDashboard({ onNavigate }: { onNavigate: (v: string) => void }) {
           </p>
           <div className="flex items-center gap-3 mt-3">
             <span className="text-xs font-mono px-2 py-1 rounded border border-primary/30 bg-primary/5 text-primary">
-              9 tools active
+              18 tools active
             </span>
             <span className="text-xs font-mono px-2 py-1 rounded border border-border bg-muted/20 text-muted-foreground">
-              5 suites planned
+              5 suites live
             </span>
             <span className="text-xs font-mono px-2 py-1 rounded border border-border bg-muted/20 text-muted-foreground">
               100% client-side
@@ -182,30 +191,6 @@ function HomeDashboard({ onNavigate }: { onNavigate: (v: string) => void }) {
 // ── Coming Soon placeholder ───────────────────────────────────────────────────
 
 const COMING_SOON_DETAILS: Record<string, { label: string; icon: React.ElementType; color: string; tools: { name: string; desc: string }[] }> = {
-  'electronics-ii': {
-    label: 'Electronics II Suite', icon: FlaskConical, color: 'text-emerald-400',
-    tools: [
-      { name: 'MOSFET & JFET Biasing Calculator', desc: 'I_D, V_GS, V_DS, g_m — Triode & Saturation regions' },
-      { name: 'Differential Amplifier & CMRR', desc: 'A_d, A_cm, CMRR in dB' },
-      { name: 'Amplifier Frequency Response (Bode)', desc: 'Bandwidth & gain roll-off plot' },
-    ],
-  },
-  'machinery': {
-    label: 'Electrical Machinery Suite', icon: Settings2, color: 'text-orange-400',
-    tools: [
-      { name: 'DC Motor / Generator Analyzer', desc: 'Back EMF, RPM, Torque, Speed–Torque curve' },
-      { name: 'Induction Motor & Slip Calculator', desc: 'N_s, slip, rotor frequency, Power Flow Diagram' },
-      { name: 'Synchronous Machine Phasor Generator', desc: 'Voltage Regulation, Torque Angle δ' },
-    ],
-  },
-  'signals': {
-    label: 'Signals & Systems Suite', icon: Waves, color: 'text-violet-400',
-    tools: [
-      { name: 'Interactive Convolution Visualizer', desc: 'Step-by-step (f * g)(t) sliding visualizer' },
-      { name: 'Laplace & Z-Transform Pole-Zero Plotter', desc: 'Poles / Zeros on s-plane or z-plane with ROC' },
-      { name: 'Fourier Series Waveform Synthesizer', desc: 'Square, Sawtooth, Triangle harmonic synthesis' },
-    ],
-  },
   'matlab': {
     label: 'MATLAB Studio & Matrix Hub', icon: Terminal, color: 'text-rose-400',
     tools: [
@@ -306,11 +291,17 @@ export default function Home() {
       case 'core.filters':         return <FilterCalculator onSave={handleSaveSetup} />;
       case 'core.smd-led':         return <SmdLedCalculator onSave={handleSaveSetup} />;
       case 'core.ac-power':        return <AcPowerCalculator />;
-      case 'micro.digital-logic':  return <DigitalLogicCalculator />;
-      case 'micro.bjt':            return <BjtCalculator />;
-      case 'electronics-ii':
-      case 'machinery':
-      case 'signals':
+      case 'micro.digital-logic':        return <DigitalLogicCalculator />;
+      case 'micro.bjt':                  return <BjtCalculator />;
+      case 'electronics-ii.mosfet':      return <MOSFETCalculator />;
+      case 'electronics-ii.diff-amp':    return <DiffAmpCMRRCalculator />;
+      case 'electronics-ii.bode':        return <BodePlotter />;
+      case 'machinery.dc-motor':         return <DCMotorAnalyzer />;
+      case 'machinery.induction':        return <InductionMotorCalc />;
+      case 'machinery.synchronous':      return <SynchronousMachineCalc />;
+      case 'signals.convolution':        return <ConvolutionVisualizer />;
+      case 'signals.pole-zero':          return <PoleZeroPlotter />;
+      case 'signals.fourier':            return <FourierSynthesizer />;
       case 'matlab':
         return <ComingSoon view={activeView} />;
       default:
